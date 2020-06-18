@@ -21,6 +21,15 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Agent.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Card.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Game.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="_21Blitz_Python.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
