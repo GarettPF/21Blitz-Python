@@ -34,10 +34,10 @@ class Game:
             card = Card(suites[s], v+1)
             self.deck.append(card)
 
-    def choose(self):
-        c = -1
-        while c < 0 or c > 4:
-            c = int(input("Choose a stack (1-4, 0 for undo): "))
+    def choose(self, c):
+        #c = -1
+        #while c < 0 or c > 4:
+        #    c = int(input("Choose a stack (1-4, 0 for undo): "))
         
         if c == 0:
             self.points = self.undo[0]
@@ -87,6 +87,7 @@ class Game:
             stack.pop()
 
     def update(self):
+        busts = self.busts
         for s in self.stack:
             sum = 0
             Ace = Wild = False
@@ -105,8 +106,12 @@ class Game:
             if (self.results(sum, len(s), Ace, Wild)):
                 self.clearStack(s)
 
-        if self.busts == 3 or time.perf_counter() - self.startTime >= 3*60:
+        if self.busts == 3 or \
+            time.perf_counter() - self.startTime >= 3*60 or \
+            len(self.deck) == 0:
             self.GameOver = True
+
+        return True if self.busts - busts != 0 else False
 
 
     def record(self):
