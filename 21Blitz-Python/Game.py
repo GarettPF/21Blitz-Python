@@ -55,6 +55,9 @@ class Game:
             self.stack[c-1].append(self.top)
             self.deck.pop()
             self.size = len(self.deck)
+            if (self.size == 0):
+                self.GameOver = True
+                return
             self.top = self.deck[-1]
             self.current = (self.points, self.busts, self.deck, self.size, self.top, self.stack)
 
@@ -106,9 +109,7 @@ class Game:
             if (self.results(sum, len(s), Ace, Wild)):
                 self.clearStack(s)
 
-        if self.busts == 3 or \
-            time.perf_counter() - self.startTime >= 3*60 or \
-            len(self.deck) == 0:
+        if self.busts == 3 or time.perf_counter() - self.startTime >= 3*60:
             self.GameOver = True
 
         return True if self.busts - busts != 0 else False

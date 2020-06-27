@@ -19,17 +19,17 @@ def play(episode):
         # display
         system('cls')
         print("Game: ", episode)
+        print("Q-table length: ", len(agent.q_table))
         game.print()
 
         # choose
-        stateNum = agent.find_state(game.stack, game.top)
-        choice = agent.choose(stateNum)
+        choice = agent.choose(game.stack, game.top)
         game.choose(choice)
 
         #update game and agent
         busted = game.update()
         nextState = agent.find_state(game.stack, game.top)
-        agent.update(stateNum, nextState, choice, game.points, busted)
+        agent.update(nextState, choice, game.points, busted)
 
     game.record()
     agent.save_data()
@@ -37,7 +37,7 @@ def play(episode):
 
 def main():
     episode = 0
-    episodes = 250
+    episodes = 500
 
     for i in range(episodes):
         play(i)

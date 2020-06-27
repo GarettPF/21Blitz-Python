@@ -14,7 +14,7 @@ class State:
                 self.stacks[stack][card] = val
         self.top = top.value
 
-    def __str__(self):
+    def str(self):
         return_str = ""
         for s in range(4):
             for c in range(5):
@@ -25,18 +25,6 @@ class State:
                     return_str += "".zfill(2)
         return_str += str(self.top).zfill(2)
         return return_str
-
-    def load(self, data):
-        stack = 0
-        card = 0
-        for v in range(0, len(data)-3, 2):
-            self.stacks[stack][card] = int(data[v:v+2])
-            stack = stack+1 if card == 4 else stack
-            card = 0 if card == 4 else card+1
-        self.top = int(data[20:22])
-
-      
-
 
 
 class Agent:
@@ -52,26 +40,34 @@ class Agent:
     """
 
     def __init__(self):
-        self.q_table = []
+        self.q_table = {}
         self.alpha = 0.4
         self.gamma = 0.8
-        self.epsilon = 0.8
-        self.states = []
+        self.epsilon = 0.3
         self.points = 0
 
-    def choose(self, state):
+    def choose(self, stack, top):
+        state = self.find_state(stack, top)
+        self.state = state
         if rand.uniform(0, 1) <= self.epsilon:
             return rand.randint(0, 4)
         else:
             return self.q_table[state].index(max(self.q_table[state]))
 
-    def update(self, cur_state, next_state, action, points, busted):
-        old_value = self.q_table[cur_state][action]
-        next_max = max(self.q_table[next_state])
-        reward = self.calc_reward(points, busted)
+    def find_state(self, stacks, top):
+        search = State(stacks, top).str()
 
-        new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
-        self.q_table[cur_state][action] = new_value
+        if search not in self.q_table:
+            self.q_table[search] = [0] * 5
+        return search
+
+    def update(self, next, action, points, busted):
+        reward = self.calc_reward(points, busted)
+        old_v = self.q_table[self.state][action]
+        next_m = max(self.q_table[next])
+
+        new_v = old_v*(1 - self.alpha) + self.alpha*(reward + (self.gamma * next_m))
+        self.q_table[self.state][action] = new_v
 
     def calc_reward(self, points, busted):
         change = points - self.points
@@ -82,44 +78,22 @@ class Agent:
         else:
             return (change // 100)
 
-    def find_state(self, stacks, top):
-        search_state = State(stacks, top).__str__()
-
-        for i in range(len(self.states)):
-            state = self.states[i].__str__()
-            if (state == search_state):
-                return i
-
-        newState = State(stacks, top)
-        self.states.append(newState)
-        self.q_table.append([0 for _ in range(5)])
-        return len(self.q_table) - 1
-
     def save_data(self):
-        with open("state_table.csv", "w") as f:
-            for state in self.states:
-                f.write(state.__str__())
-                f.write('\n')
-
         with open("q_table.csv", "w") as f:
-            for value in self.q_table:
-                for v in value:
-                    f.write(str(v) + ",")
+            for state, actions in self.q_table.items():
+                f.write(state + ',')
+                for a in actions: 
+                    f.write(str(a) + ',')
                 f.write('\n')
 
     def load_data(self):
-        with open("state_table.csv", "r") as f:
-            for line in f:
-                state = State([[]], Card('', 0))
-                state.load(line)
-                self.states.append(state)
-
         with open("q_table.csv", "r") as f:
             for line in f:
                 values = line.split(',')
+                key = values[0]
                 new_values = []
-                for v in range(len(values)-1):
+                for v in range(1, len(values)-1):
                     new_values.append(float(values[v]))
-                self.q_table.append(new_values)
+                self.q_table[key] = new_values
 
     
